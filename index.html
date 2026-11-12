@@ -30,6 +30,10 @@
     margin: 24px 0;
   }
 
+  [hidden] {
+    display: none !important;
+  }
+
   input, select, button {
     font: inherit;
   }
@@ -308,10 +312,10 @@
     </div>
     <label class="field">Append numbers <input type="text" id="numbers" placeholder="e.g. 7, 99, 2025" inputmode="decimal"></label>
     <p class="hint">Each number is added as an extra variant of every name.</p>
-    <div class="button-row">
-      <button type="button" id="classicFormat">Use classic format</button>
-    </div>
     <p class="hint">Classic Roblox style puts the adjective first (<span data-example="prefix"></span>), as written, with no underscore or numbers.</p>
+    <div class="button-row" id="classicFormatRow" hidden>
+      <button type="button" id="classicFormat">Back to classic format</button>
+    </div>
   </details>
 
   <div class="button-row">
@@ -333,8 +337,8 @@
     </label>
     <label class="field">Max length <input type="range" id="maxLength" min="3" max="20" value="20"> <output id="maxLengthValue"></output></label>
   </div>
-  <label class="check"><input type="checkbox" id="showRejected"> Show names Roblox would reject, with the reason</label>
-  <p class="hint">Roblox accepts 3 to 20 characters: letters, numbers and at most one underscore, not at the start or end. This can't check whether a name is already taken.</p>
+  <label class="check" id="hideRejectedRow" hidden><input type="checkbox" id="hideRejected"> <span id="hideRejectedLabel"></span></label>
+  <p class="hint">Roblox accepts 3 to 20 characters: letters, numbers and at most one underscore, not at the start or end. Names it would reject are listed last, greyed out, with the reason. This can't check whether a name is already taken.</p>
 
   <div class="button-row">
     <button type="button" id="copyAll">Copy all</button>
@@ -421,7 +425,10 @@ const searchInput = byId('search');
 const sortSelect = byId('sort');
 const maxLengthInput = byId('maxLength');
 const maxLengthValue = byId('maxLengthValue');
-const showRejectedInput = byId('showRejected');
+const hideRejectedInput = byId('hideRejected');
+const hideRejectedRow = byId('hideRejectedRow');
+const hideRejectedLabel = byId('hideRejectedLabel');
+const classicFormatRow = byId('classicFormatRow');
 const resultCount = byId('resultCount');
 const rejectedSummary = byId('rejectedSummary');
 const formatSection = byId('formatSection');
@@ -551,13 +558,23 @@ function renderFormatExamples() {
   }
 }
 
+function isClassicFormat() {
+  return [...formatSection.querySelectorAll('input')].every(input =>
+    input.checked === input.defaultChecked && input.value === input.defaultValue);
+}
+
 function refresh() {
   maxLengthValue.textContent = maxLengthInput.value;
   renderFormatExamples();
+  classicFormatRow.hidden = isClassicFormat();
   const candidates = filterAndSort(generateNames());
-  const showRejected = showRejectedInput.checked;
-  matches = showRejected ? candidates : candidates.filter(entry => !isRejected(entry));
-  rejectedSummary.textContent = showRejected ? '' : summarizeRejected(candidates.filter(isRejected));
+  const accepted = candidates.filter(entry => !isRejected(entry));
+  const rejected = candidates.filter(isRejected);
+  const hideRejected = hideRejectedInput.checked;
+  matches = hideRejected ? accepted : [...accepted, ...rejected];
+  hideRejectedRow.hidden = rejected.length === 0;
+  hideRejectedLabel.textContent = `Hide the ${rejected.length} ${rejected.length === 1 ? 'name' : 'names'} Roblox would reject`;
+  rejectedSummary.textContent = hideRejected ? summarizeRejected(rejected) : '';
   visibleLimit = PAGE_SIZE;
   renderResults();
 }

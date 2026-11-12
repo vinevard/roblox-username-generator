@@ -15,7 +15,7 @@ Or download `index.html` and open it in a browser. It is one file with no build 
 ## What it does
 
 - Combines your word with 486 adjectives, grouped into 16 categories you can switch on and off.
-- Hides the names Roblox would reject, and shows the reason for each one if you ask.
+- Greys out the names Roblox would reject and shows the reason beside each one. You can hide them.
 - Can put the adjective after the word, add an underscore, change the case, or add numbers.
 - Lets you search, sort and shuffle the names, and set a maximum length.
 - Copies a name when you click or tap it. You can also copy or save the whole list.
