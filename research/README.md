@@ -8,7 +8,7 @@ They are recoverable anyway, because a lot of people took the suggestion. This f
 
 ## Summary
 
-- One rule applied to prefix counts recovers 485 suggestion words. On the rule's score, 96% of them are above 600, and apart from `BadUsername` no other prefix is above 139.
+- One rule applied to prefix counts recovers 485 suggestion words. In 2016, 96% of them appear over 600 times more per 10 million accounts than they usually do. Apart from `BadUsername`, no other prefix manages more than 139.
 - Suggested names first appear on 24 November 2009, around account 5,334,300. They fall back to the background level with accounts created around 8 March 2017.
 - Suggested names became far more common from 13 July 2015, and again from 18 November 2015, but the words stayed the same. We found no second list.
 - One word, `Powerful`, was a suggestion at the start and was dropped at some point before July 2015.
@@ -44,10 +44,10 @@ The archive is a single 47.7 GB LZMA2 stream, so the front of it can be read wit
 
 **2. Apply one rule.** Ordinary prefixes such as `The`, `Super` or `Dark` are in use all the time. A suggestion word is common only while Roblox is suggesting it. Suggestions peak for accounts 110–200 million (February to December 2016), so for each prefix:
 
-- work out a baseline, the higher of its mean count in accounts 40–90 million and its mean count in accounts 300–400 million
-- subtract the baseline from its count for each 10 million accounts between 110 and 200 million
-- take the smallest of those differences as its score
-- keep the prefix if the score is at least 250
+- find its usual level, the higher of its average count in accounts 40–90 million and its average count in accounts 300–400 million
+- find its lowest count in 2016, looking at each 10 million accounts between 110 and 200 million
+- subtract the usual level from that lowest count to get its extra names in 2016
+- keep the prefix if it has at least 250 extra names
 
 Only prefixes made entirely of letters, starting with a capital and not written in all capitals are considered. All-caps versions of suggestion words (`FAST`, `LUCKY`, `SPOOKY`) turn up in the data too, starting at the same point in 2009, presumably because the service copied the capitalisation of the name typed. They are the same words, so we skip them.
 
@@ -65,13 +65,27 @@ The rule keeps 486 prefixes: 485 words and `BadUsername`. The raw output is in [
 
 Most are ordinary adjectives. A few are not adjectives at all (`Plant`, `Quack`, `Actually`, `Madly`), and a few are in-jokes (`TimLike`, see below).
 
-The cut-off of 250 could be moved a long way without changing the result. Anywhere from 150 to 250 gives the same 486. At 300, one word and `BadUsername` drop out. At 100, two non-words (`Itz`, `Kawaii`) get in. The lowest-scoring word scores 291.
+A few real prefixes show how the rule plays out. All counts are per 10 million accounts.
 
-Splitting names mechanically also produces cut-off words such as `Fearles` and `Nervou`, because `Fearles` + `steve` is as valid a split as `Fearless` + `teve`. These score below 80, so the rule rejects them.
+| Prefix | Usual level | Lowest in 2016 | Extra names | Kept |
+|---|---|---|---|---|
+| `Glorious` | 103 | 999 | +896 | yes |
+| `Synonymous` | 22 | 687 | +665 | yes |
+| `Black` | 825 | 1,116 | +291 | yes, the lowest word |
+| `BadUsername` | 7 | 284 | +277 | yes, but not a word |
+| `Kawaii` | 212 | 351 | +139 | no, the nearest miss |
+| `Fearles` | 13 | 78 | +65 | no |
+| `Super` | 1,692 | 932 | −760 | no |
 
-![Histogram of rule scores: rejected prefixes on the left, the 485 words far to the right](scores.png)
+`Glorious` is typical: about a hundred in ordinary times and about a thousand in 2016. `Black` comes last among the words because it is also a common ordinary prefix, so its usual level is high. `Super` is common all the time and was lower in 2016 than usual.
 
-The histogram shows the score of every prefix that reaches 50. The 485 words sit in one cluster centred near 830, and the nearest rejected prefix is at 139. The scores are in [`scores.csv`](scores.csv).
+![Chart of prefixes in order of extra names in 2016: 486 sit high, then the values drop sharply](ranked.png)
+
+The chart puts every prefix in order of its extra names. The first 486 are well above the cut-off, and the 487th drops to 139. The numbers for the top 700 prefixes are in [`ranked.csv`](ranked.csv).
+
+The cut-off of 250 could be moved a long way without changing the result. Anywhere from 150 to 250 gives the same 486. At 300, one word and `BadUsername` drop out. At 100, two non-words (`Itz`, `Kawaii`) get in.
+
+Splitting names mechanically also produces cut-off words such as `Fearles` and `Nervou`, because `Fearles` + `steve` is as valid a split as `Fearless` + `teve`. These have fewer than 80 extra names, so the rule rejects them.
 
 ### Timeline
 
@@ -103,7 +117,7 @@ The test in step 3 passes 402 capitalised prefixes. 396 of them are words alread
 
 ### BadUsername
 
-`BadUsername` passes the rule with a score of 277, but it is not an adjective, and it behaves differently from every suggestion word. It is almost absent before account 89 million, with fewer than five occurrences per 10 million accounts. Nearly all of it is on accounts created between July 2015 and January 2017, which overlaps the 2016 window the rule looks at.
+`BadUsername` passes the rule with 277 extra names, but it is not an adjective, and it behaves differently from every suggestion word. It is almost absent before account 89 million, with fewer than five occurrences per 10 million accounts. Nearly all of it is on accounts created between July 2015 and January 2017, which overlaps the 2016 window the rule looks at.
 
 We left it out of the final list. Our guess is that Roblox gave this name to accounts whose usernames were removed by moderation. The data cannot confirm that.
 
@@ -141,7 +155,7 @@ python research/profile_all.py data/rbx-users-6b.part data/bands.json.base data/
 python research/derive_list.py data/profile.json data/derived-words.txt
 python research/blind_discovery.py data/rbx-users-6b.part data/bands.json.base data/blind.json 4000000 6000000 30000000
 python research/plot_timeline.py data/profile.json data/derived-words.txt data/timeline.png data/timeline.csv
-python research/plot_scores.py data/profile.json data/scores.png data/scores.csv
+python research/plot_ranked.py data/profile.json data/ranked.png data/ranked.csv
 python research/launch_detail.py data/rbx-users-6b.part data/bands.json.base suggestion-words.txt data/launch.json
 python research/plot_launch.py data/launch.json data/launch.png data/launch.csv
 ```
@@ -154,7 +168,7 @@ python research/plot_launch.py data/launch.json data/launch.png data/launch.csv
 | `derive_list.py` | Step 2. Applies the rule. |
 | `blind_discovery.py` | Step 3. Prefix counts around the start of the feature in bins of 250,000. |
 | `plot_timeline.py` | Draws the timeline figure. |
-| `plot_scores.py` | Draws the histogram of rule scores. |
+| `plot_ranked.py` | Draws the chart of prefixes in order of extra names. |
 | `launch_detail.py` | Counts suggested names in bins of 5,000 accounts up to account 8 million, and lists the usernames around the start. |
 | `plot_launch.py` | Draws the chart of the start of the feature. |
 | `chart_style.py` | Colours and axis styling shared by the three plotting scripts. |
