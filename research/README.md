@@ -4,7 +4,7 @@ From late 2009 to early 2017, if you tried to sign up to Roblox with a username 
 
 They are recoverable anyway, because a lot of people took the suggestion. This folder shows how to pull the words out of a public dump of Roblox usernames without starting from a word list.
 
-![Six small line charts of prefix counts by account ID](timeline.png)
+![Six small line charts of how often each prefix starts a username, from 2009 to 2018](timeline.png)
 
 ## Summary
 
@@ -24,7 +24,7 @@ Everyone who took a suggestion ended up with a username made of an adjective fol
 
 ## Data
 
-We used ["the first 6 billion roblox users"](https://archive.org/details/rbx-users-6b.7z), a dump of `id:username` lines collected by walking account IDs upward ([write-up by its author](https://blog.shy.rocks/p/scraping-roblox-users/)). Account IDs are assigned in order, so position in the file is a timeline. We looked up a handful of IDs on Roblox's public users API to attach dates:
+We used ["the first 6 billion roblox users"](https://archive.org/details/rbx-users-6b.7z), a dump of `id:username` lines collected by walking account IDs upward ([write-up by its author](https://blog.shy.rocks/p/scraping-roblox-users/)). Account IDs are assigned in order, so position in the file is a timeline. To turn account IDs into dates we looked up when 449 accounts were created, using Roblox's public users API, and saved the result as [`account-dates.csv`](account-dates.csv). Any other account is dated from its two nearest neighbours in that table. Some of the key ones:
 
 | Account ID | Created |
 |---|---|
@@ -53,7 +53,7 @@ Only prefixes made entirely of letters, starting with a capital and not written 
 
 `derive_list.py` does this and writes [`derived-words.txt`](derived-words.txt).
 
-**3. Look at the start.** Recount prefixes in bins of 250,000 accounts over the first 30 million. This dates the start of the feature and catches words that Roblox retired before 2016, which step 2 cannot see. A prefix counts as starting with the feature if it occurs at least 20 times in accounts 5.5–7.5 million, and at least eight times as often as in accounts 3.25–5.25 million (counted as one more than it is, so that a count of zero does not let everything through). Any capitalised word that passes this test but is missing from the step 2 list may be a retired word. `launch_detail.py` then counts suggested names in bins of 5,000 accounts and lists the usernames around the start, which gives the exact day.
+**3. Look at the start.** Recount prefixes in bins of 250,000 accounts over the first 30 million. This dates the start of the feature and catches words that Roblox retired before 2016, which step 2 cannot see. A prefix counts as starting with the feature if it occurs at least 20 times in accounts 5.5–7.5 million, and at least eight times as often as in accounts 3.25–5.25 million (counted as one more than it is, so that a count of zero does not let everything through). Any capitalised word that passes this test but is missing from the step 2 list may be a retired word. `count_suggested.py` then counts suggested names in bins of 5,000 accounts up to the end of 2017, in bins of 100 around the start, and lists the usernames at the start, which gives the exact day.
 
 ## Results
 
@@ -89,6 +89,10 @@ Splitting names mechanically also produces cut-off words such as `Fearles` and `
 
 ### Timeline
 
+![Bar chart of suggested names per month from 2009 to 2017: low for years, a large rise from mid-2015, and a sharp fall in early 2017](over-time.png)
+
+Each bar is one month. It counts the accounts created that month whose username is a suggestion word in front of one of the early usernames. The bars are far taller in 2016 partly because many more people were signing up by then. The values are in [`over-time.csv`](over-time.csv).
+
 | Accounts | Dates | What happens |
 |---|---|---|
 | below 5.334M | to 24 Nov 2009 | No suggested names. |
@@ -99,9 +103,9 @@ Splitting names mechanically also produces cut-off words such as `Fearles` and `
 | 222M–227M | 24–30 Jan 2017 | Sharp drop. |
 | 258M | 8 Mar 2017 | Back to the level before July 2015. |
 
-![Chart of suggested names per 25,000 accounts, flat until account 5.334 million and then about eight times higher](launch.png)
+![Chart of suggested names per 25,000 accounts from May 2009 to May 2010, flat until 24 November 2009 and then about eight times higher](launch.png)
 
-The low, flat level before the start is ordinary usernames that happen to begin with one of the words. The values are in [`launch.csv`](launch.csv).
+This chart looks closely at the start. Each step is 25,000 new accounts, and one step begins exactly at the first suggested name. The low, flat level before it is ordinary usernames that happen to begin with one of the words. The single step at zero in September 2009 is a run of about 29,000 accounts with no such names at all, which we have not looked into. The values are in [`launch.csv`](launch.csv).
 
 The first run of suggested names begins around account 5,334,300, created at about 02:00 UTC on 24 November 2009. Several of the first ones are built on staff and site names, such as `DramaticTelamon`, which looks like people at Roblox trying the feature out.
 
@@ -135,7 +139,7 @@ The list contains `SamLike`, `TimLike`, `VibhuLike` and `TelamonLike`, where "Li
 
 ## The timeline figure
 
-Each panel of the figure at the top of this page plots one prefix (blue) against the median of the 485 suggestion words (grey), per 10 million accounts, with markers at November 2009, July 2015 and March 2017. Each panel has its own vertical scale, so only the shapes of the lines can be compared between panels. The numbers are in [`timeline.csv`](timeline.csv).
+Each panel of the figure at the top of this page plots one prefix (blue) against the median of the 485 suggestion words (grey). Each point is the count in 10 million new accounts, placed at the date those accounts were created, so points sit closer together in busy years. The markers are at November 2009, July 2015 and March 2017. Each panel has its own vertical scale, so only the shapes of the lines can be compared between panels. The numbers are in [`timeline.csv`](timeline.csv).
 
 - **Glorious** is a typical suggestion word.
 - **Awesome** and **Roblox** are common ordinary prefixes that the rule rejects.
@@ -156,8 +160,9 @@ python research/derive_list.py data/profile.json data/derived-words.txt
 python research/blind_discovery.py data/rbx-users-6b.part data/bands.json.base data/blind.json 4000000 6000000 30000000
 python research/plot_timeline.py data/profile.json data/derived-words.txt data/timeline.png data/timeline.csv
 python research/plot_ranked.py data/profile.json data/ranked.png data/ranked.csv
-python research/launch_detail.py data/rbx-users-6b.part data/bands.json.base suggestion-words.txt data/launch.json
-python research/plot_launch.py data/launch.json data/launch.png data/launch.csv
+python research/count_suggested.py data/rbx-users-6b.part data/bands.json.base suggestion-words.txt data/suggested.json
+python research/plot_launch.py data/suggested.json data/launch.png data/launch.csv
+python research/plot_over_time.py data/suggested.json data/over-time.png data/over-time.csv
 ```
 
 | Script | What it does |
@@ -169,12 +174,15 @@ python research/plot_launch.py data/launch.json data/launch.png data/launch.csv
 | `blind_discovery.py` | Step 3. Prefix counts around the start of the feature in bins of 250,000. |
 | `plot_timeline.py` | Draws the timeline figure. |
 | `plot_ranked.py` | Draws the chart of prefixes in order of extra names. |
-| `launch_detail.py` | Counts suggested names in bins of 5,000 accounts up to account 8 million, and lists the usernames around the start. |
+| `count_suggested.py` | Counts suggested names in bins of 5,000 accounts up to account 480 million, and lists the usernames around the start. About 15 minutes. |
 | `plot_launch.py` | Draws the chart of the start of the feature. |
-| `chart_style.py` | Colours and axis styling shared by the three plotting scripts. |
+| `plot_over_time.py` | Draws the chart of suggested names per month. |
+| `account_dates.py` | Rebuilds `account-dates.csv` from Roblox's public API. Not needed to redraw the charts, since the table is included. Run as `python research/account_dates.py research/account-dates.csv`; about ten minutes. |
+| `dates.py` | Converts between account IDs and dates using that table. |
+| `chart_style.py` | Colours and axis styling shared by the plotting scripts. |
 | `examples_and_fine_bins.py` | Pulls example usernames for chosen prefixes and per-million counts around the 2015 and 2017 changes. |
 
-We ran these commands as printed and they reproduce the shipped files exactly: the same `derived-words.txt` and the same values behind all three charts. The one shortcut was the download, where we re-fetched and compared only the first 50 MB, since the full 8.86 GB was already on disk.
+We ran these commands as printed and they reproduce the shipped files exactly: the same `derived-words.txt` and the same values behind all four charts. The one shortcut was the download, where we re-fetched and compared only the first 50 MB, since the full 8.86 GB was already on disk.
 
 ## Limitations
 
