@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Combine a base word with themed modifiers to generate username ideas that follow Roblox's naming rules.">
+<title>Roblox Username Generator</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23333'/%3E%3Ctext x='8' y='12.5' font-family='Arial' font-size='12' font-weight='bold' text-anchor='middle' fill='%23fff'%3EU%3C/text%3E%3C/svg%3E">
+<style>
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    max-width: 820px;
+    margin: 20px auto;
+    padding: 0 16px;
+    color: #000;
+    line-height: 1.4;
+    -webkit-text-size-adjust: 100%;
+  }
+  h1 {
+    font-size: 24px;
+    margin: 0 0 12px;
+  }
+  h2 {
+    font-size: 18px;
+    margin: 20px 0 8px;
+  }
+  footer {
+    font-size: 13px;
+    color: #666;
+    margin: 24px 0;
+  }
+
+  input, select, button {
+    font: inherit;
+  }
+  input[type=text], input[type=search] {
+    box-sizing: border-box;
+    width: 240px;
+    max-width: 100%;
+    padding: 4px 6px;
+  }
+  button {
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+
+  details {
+    border: 1px solid #aaa;
+    margin: 8px 0;
+    padding: 6px 10px;
+  }
+  summary {
+    cursor: pointer;
+    font-weight: bold;
+    padding: 2px 0;
+  }
+  details details {
+    border: 0;
+    margin: 8px 0 0;
+    padding: 0;
+  }
+  details details summary {
+    font-weight: normal;
+  }
+  fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+  legend {
+    padding: 0;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .field {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin: 8px 0;
+  }
+  .check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    padding: 3px 0;
+  }
+  .button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 8px 0;
+  }
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 24px;
+  }
+  .hint {
+    font-size: 13px;
+    color: #666;
+    margin: 4px 0;
+  }
+  .word-types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 20px;
+    margin-top: 8px;
+  }
+  .format-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13em, 1fr));
+    gap: 8px 16px;
+    margin-top: 8px;
+  }
+
+  #categories {
+    columns: 3 8em;
+    column-gap: 12px;
+    margin-top: 6px;
+  }
+  #categories .check {
+    break-inside: avoid;
+  }
+  #categories .count {
+    color: #666;
+  }
+  #categoryWords {
+    font-size: 14px;
+    margin: 6px 0 0;
+  }
+  #categoryWords dt {
+    font-weight: bold;
+  }
+  #categoryWords dd {
+    margin: 0 0 6px;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: min(180px, 45vw);
+    height: 4px;
+    background: #bbb;
+    border: 1px solid #888;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 18px;
+    background: #333;
+    border: 1px solid #000;
+    cursor: pointer;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 12px;
+    height: 18px;
+    background: #333;
+    border: 1px solid #000;
+    border-radius: 0;
+    cursor: pointer;
+  }
+  input[type=range]::-moz-range-track {
+    height: 4px;
+    background: #bbb;
+  }
+
+  #resultCount {
+    font-size: 13px;
+    color: #444;
+    margin: 4px 0;
+  }
+  #rejectedSummary {
+    font-size: 13px;
+    color: #b00;
+    margin: 4px 0;
+  }
+  #results {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 12px;
+    margin: 6px 0;
+    padding: 0;
+    list-style: none;
+  }
+  #results li {
+    cursor: pointer;
+    padding: 2px 0;
+    overflow-wrap: anywhere;
+  }
+  @media (min-width: 700px) {
+    #results {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  #results .invalid {
+    color: #999;
+  }
+  #results .problems {
+    color: #b00;
+    font-size: 12px;
+  }
+  #toast {
+    position: fixed;
+    bottom: 14px;
+    left: 14px;
+    max-width: calc(100% - 48px);
+    background: #000;
+    color: #fff;
+    padding: 6px 10px;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+
+  @media (pointer: coarse) {
+    .check {
+      padding: 8px 0;
+    }
+    summary {
+      padding: 8px 0;
+    }
+    button, select {
+      min-height: 40px;
+    }
+    input[type=text], input[type=search] {
+      padding: 8px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      width: 24px;
+      height: 28px;
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 24px;
+      height: 28px;
+    }
+    #results li {
+      padding: 6px 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>Roblox Username Generator</h1>
+
+<form id="options" autocomplete="off">
+
+  <label class="field"><strong>Base word</strong> <input type="text" id="base" value="Noob" autocorrect="off" spellcheck="false"></label>
+
+  <details id="modifiersSection" open>
+    <summary>Modifier categories</summary>
+    <p class="hint">The words come from the usernames Roblox suggested at sign-up from 2009 to 2017.</p>
+    <div class="button-row">
+      <button type="button" id="selectAllCategories">Select all</button>
+      <button type="button" id="clearAllCategories">Clear</button>
+    </div>
+    <div id="categories"></div>
+    <fieldset class="word-types">
+      <legend>Word types</legend>
+      <label class="check"><input type="checkbox" name="wordType" id="wordTypeAdjective" value="adjective" checked> <span>Adjectives (Happy)</span></label>
+      <label class="check"><input type="checkbox" name="wordType" id="wordTypeVerb" value="verb" checked> <span>Verb forms (Roasted, Cooing)</span></label>
+      <label class="check"><input type="checkbox" name="wordType" id="wordTypeOther" value="other" checked> <span>Other (Actually, Plant)</span></label>
+    </fieldset>
+    <details id="categoryWordsSection">
+      <summary>Show the words in each category</summary>
+      <dl id="categoryWords"></dl>
+    </details>
+  </details>
+
+  <details id="formatSection" open>
+    <summary>Name format</summary>
+    <p class="hint">Examples use your base word with the modifier Happy.</p>
+    <div class="format-grid">
+      <fieldset>
+        <legend>Placement</legend>
+        <label class="check"><input type="checkbox" name="placement" id="placementPrefix" value="prefix" checked> <span>Before base (<span data-example="prefix"></span>)</span></label>
+        <label class="check"><input type="checkbox" name="placement" id="placementSuffix" value="suffix"> <span>After base (<span data-example="suffix"></span>)</span></label>
+      </fieldset>
+      <fieldset>
+        <legend>Separator</legend>
+        <label class="check"><input type="checkbox" name="separator" id="separatorNone" value="" checked> <span>None (<span data-example="prefix"></span>)</span></label>
+        <label class="check"><input type="checkbox" name="separator" id="separatorUnderscore" value="_"> <span>Underscore (<span data-example="underscore"></span>)</span></label>
+      </fieldset>
+      <fieldset>
+        <legend>Casing</legend>
+        <label class="check"><input type="radio" name="casing" id="casingOriginal" value="original" checked> <span>As written (<span data-example="prefix"></span>)</span></label>
+        <label class="check"><input type="radio" name="casing" id="casingLower" value="lower"> <span>All lowercase (<span data-example="lower"></span>)</span></label>
+        <label class="check"><input type="radio" name="casing" id="casingUpper" value="upper"> <span>All uppercase (<span data-example="upper"></span>)</span></label>
+      </fieldset>
+    </div>
+    <label class="field">Append numbers <input type="text" id="numbers" placeholder="e.g. 7, 99, 2025" inputmode="decimal"></label>
+    <p class="hint">Each number is added as an extra variant of every name.</p>
+    <div class="button-row">
+      <button type="button" id="classicFormat">Use classic format</button>
+    </div>
+    <p class="hint">Classic Roblox style puts the adjective first (<span data-example="prefix"></span>), as written, with no underscore or numbers.</p>
+  </details>
+
+  <div class="button-row">
+    <button type="button" id="resetOptions">Reset all options</button>
+  </div>
+
+  <h2>Results</h2>
+
+  <div class="filter-row">
+    <label class="field">Search <input type="search" id="search" placeholder="filter results"></label>
+    <label class="field">Sort
+      <select id="sort">
+        <option value="modifier">By modifier</option>
+        <option value="shuffle">Shuffle</option>
+        <option value="alphabetical">A to Z</option>
+        <option value="shortest">Shortest first</option>
+        <option value="longest">Longest first</option>
+      </select>
+    </label>
+    <label class="field">Max length <input type="range" id="maxLength" min="3" max="20" value="20"> <output id="maxLengthValue"></output></label>
+  </div>
+  <label class="check"><input type="checkbox" id="showRejected"> Show names Roblox would reject, with the reason</label>
+  <p class="hint">Roblox accepts 3 to 20 characters: letters, numbers and at most one underscore, not at the start or end. This can't check whether a name is already taken.</p>
+
+  <div class="button-row">
+    <button type="button" id="copyAll">Copy all</button>
+    <button type="button" id="exportNames">Export .txt</button>
+  </div>
+
+</form>
+
+<p id="resultCount"></p>
+
+<p id="rejectedSummary"></p>
+
+<ul id="results"></ul>
+
+<p id="more" hidden>
+  <span id="moreCount"></span>
+  <button type="button" id="showMore">Show more</button>
+</p>
+
+<footer>Not affiliated with, endorsed by or sponsored by Roblox Corporation.</footer>
+
+<div id="toast" role="status" hidden></div>
+
+<script>
+const CATEGORIES = {
+  Positive: ['Happy', 'Glorious', 'Perfect', 'Good', 'Healthy', 'Victorious', 'Splendid', 'Wonderful', 'Magnificent', 'Amazing', 'Excellent', 'Successful', 'Productive', 'Majestic', 'Spectacular', 'Fortunate', 'Absorbing', 'Adorable', 'Astonishing', 'Better', 'Comfortable', 'Cool', 'Cuddly', 'Delightful', 'Elite', 'Entertaining', 'Exclusive', 'Fabulous', 'Fantastic', 'Flawless', 'Great', 'Groovy', 'Likeable', 'Lovely', 'Lucky', 'Momentous', 'Nice', 'Nifty', 'Pleasant', 'Precious', 'Premium', 'Rare', 'Satisfying', 'Spiffy', 'Supreme', 'Ultra', 'Unequaled', 'Uttermost', 'Wealthy', 'Powerful'],
+  Personality: ['Kind', 'Gentle', 'Friendly', 'Wise', 'Observant', 'Determined', 'Neighborly', 'Reflective', 'Protective', 'Watchful', 'Helpful', 'Talented', 'Courageous', 'Adaptable', 'Alert', 'Animated', 'Aspiring', 'Aware', 'Capable', 'Cooperative', 'Cultured', 'Decisive', 'Decorous', 'Diligent', 'Discreet', 'Eager', 'Educated', 'Encouraging', 'Energetic', 'Fanatical', 'Fearless', 'Guarded', 'Guiltless', 'Honorable', 'Hospitable', 'Impartial', 'Industrious', 'Instinctive', 'Judicious', 'Kindhearted', 'Knowing', 'Learned', 'Literate', 'Lively', 'Loving', 'Macho', 'Merciful', 'Obedient', 'Rambunctious', 'Receptive', 'Resolute', 'Righteous', 'Secretive', 'Selective', 'Sincere', 'Skillful', 'Sneaky', 'Steadfast', 'Tame', 'Tough', 'Unbiased', 'Wary', 'Willing', 'Yielding', 'Knowledgeable', 'Overconfident'],
+  Mood: ['Absorbed', 'Abstracted', 'Addicted', 'Afraid', 'Cheerful', 'Crabby', 'Dizzy', 'Elated', 'Enthusiastic', 'Exultant', 'Fascinated', 'Festive', 'Fretful', 'Grouchy', 'Grumpy', 'Hungry', 'Hurt', 'Jealous', 'Jittery', 'Jolly', 'Joyous', 'Jumpy', 'Longing', 'Nervous', 'Overjoyed', 'Peaceful', 'Proud', 'Pumped', 'Relieved', 'Sad', 'Somber', 'Tearful', 'Tranquil', 'Upbeat', 'Upset', 'Uptight', 'Wakeful', 'Wanting', 'Weary', 'Wistful', 'Worried', 'Heartbreaking', 'Disillusioned'],
+  Negative: ['Bad', 'Mindless', 'Cowardly', 'Pathetic', 'Weak', 'Worthless', 'Unsuitable', 'Questionable', 'Absent', 'Ambiguous', 'Apathetic', 'Boring', 'Broken', 'Clumsy', 'Combative', 'Craven', 'Cynical', 'Damaged', 'Defective', 'Disagreeable', 'Dispensable', 'Dull', 'Empty', 'Faulty', 'Forgetful', 'Frail', 'Greedy', 'Gullible', 'Hesitant', 'Ignorant', 'Imperfect', 'Inconclusive', 'Labored', 'Lacking', 'Lazy', 'Lowly', 'Lying', 'Naive', 'Needless', 'Needy', 'Nosy', 'Overrated', 'Pointless', 'Possessive', 'Quarrelsome', 'Redundant', 'Sloppy', 'Stingy', 'Taboo', 'Tiresome', 'Tricky', 'Unable', 'Unadvised', 'Undesirable', 'Vague', 'Wasteful', 'Dysfunctional', 'Materialistic', 'Unaccountable'],
+  Scary: ['Painful', 'Nasty', 'Demonic', 'Psychotic', 'Evil', 'Devilish', 'Scary', 'Horrible', 'Rabid', 'Malicious', 'Abandoned', 'Creepy', 'Damaging', 'Deserted', 'Hollow', 'Maniacal', 'Ruthless', 'Shocking', 'Spooky', 'Wicked'],
+  Weird: ['Bizarre', 'Offbeat', 'Wacky', 'Goofy', 'Whimsical', 'Quack', 'Hysterical', 'Deranged', 'Psychedelic', 'Absurd', 'Capricious', 'Crazy', 'Daffy', 'Deadpan', 'Dramatic', 'Erratic', 'Exotic', 'Funny', 'Hilarious', 'Humorous', 'Jumbled', 'Laughable', 'Odd', 'Quaint', 'Silly', 'Strange', 'Unusual'],
+  Fantasy: ['Magical', 'Godly', 'Heavenly', 'Enchanting', 'Invincible', 'Omniscient', 'Hypnotic', 'Imaginary', 'Mighty', 'Mysterious', 'Royal', 'Spiritual'],
+  Nature: ['Earthy', 'Rustic', 'Wooden', 'Flowery', 'Rainy', 'Breezy', 'Watery', 'Oceanic', 'Aquatic', 'Plant', 'Alive', 'Cloudy', 'Lush', 'Rural'],
+  Colors: ['Yellow', 'Black', 'Red', 'Tan', 'Magenta', 'Purple', 'Orange', 'Green'],
+  Size: ['Tiny', 'Small', 'Large', 'Huge', 'Gigantic', 'Massive', 'Mammoth', 'Immense', 'Miniature', 'Vast', 'Broad', 'Giant', 'Half', 'Heavy', 'High', 'Light', 'Little', 'Long', 'Low', 'Many', 'Minor', 'Narrow', 'Numberless', 'Numerous', 'Petite', 'Puny', 'Roomy', 'Scarce', 'Shallow', 'Short', 'Tall', 'Wee', 'Wide'],
+  Looks: ['Beautiful', 'Bright', 'Classy', 'Crooked', 'Curly', 'Dapper', 'Dashing', 'Dazzling', 'Faded', 'Fancy', 'Glamorous', 'Gleaming', 'Glossy', 'Gorgeous', 'Graceful', 'Handsome', 'Jazzy', 'Lean', 'Lopsided', 'Oval', 'Pretty', 'Puffy', 'Round', 'Seemly', 'Skinny', 'Square', 'Tacky', 'Tasteful', 'Unbecoming', 'Uneven', 'Unsightly', 'Wiry', 'Womanly'],
+  Senses: ['Acoustic', 'Adhesive', 'Boiling', 'Bumpy', 'Chilly', 'Cold', 'Cooing', 'Damp', 'Dry', 'Dusty', 'Earsplitting', 'Eatable', 'Foamy', 'Icky', 'Itchy', 'Lyrical', 'Melodic', 'Moldy', 'Mushy', 'Noiseless', 'Noisy', 'Nutritious', 'Quiet', 'Raspy', 'Roasted', 'Shrill', 'Smelly', 'Soggy', 'Spicy', 'Tangy', 'Voiceless', 'Warm', 'Wet', 'Whispering', 'Yummy'],
+  Time: ['Ahead', 'Ancient', 'Brief', 'Ceaseless', 'Daily', 'Early', 'Elderly', 'Fast', 'Futuristic', 'Habitual', 'Halting', 'Historical', 'Hurried', 'Late', 'New', 'Nonstop', 'Obsolete', 'Old', 'Periodic', 'Perpetual', 'Quick', 'Quickest', 'Slow', 'Temporary', 'Young', 'Youthful'],
+  Practical: ['Scientific', 'Functional', 'Efficient', 'Modern', 'Optimal', 'Dynamic', 'Accessible', 'Acceptable', 'Accurate', 'Available', 'Coherent', 'Credible', 'Detailed', 'Economic', 'Efficacious', 'Endurable', 'Expensive', 'Imported', 'Legal', 'Obtainable', 'Permissible', 'Rightful', 'Tangible', 'Tested', 'Thinkable', 'Used', 'Wholesale', 'Workable'],
+  Plain: ['Accidental', 'Actually', 'Alike', 'Assorted', 'Average', 'Changeable', 'Divergent', 'Equable', 'Foregoing', 'Handsomely', 'Internal', 'Known', 'Level', 'Madly', 'Marked', 'Nondescript', 'Null', 'Ordinary', 'Rhetorical', 'Standing', 'Symptomatic', 'Synonymous', 'Telling', 'Typical', 'Uncovered', 'Understood', 'Various'],
+  Roblox: ['Roblo', 'SamLike', 'TimLike', 'TelamonLike', 'VibhuLike'],
+};
+
+const VERB_FORMS = new Set(['Abandoned', 'Absorbed', 'Absorbing', 'Abstracted', 'Addicted', 'Amazing', 'Animated', 'Aspiring', 'Assorted', 'Astonishing', 'Boiling', 'Boring', 'Broken', 'Cooing', 'Damaged', 'Damaging', 'Dashing', 'Dazzling', 'Deranged', 'Deserted', 'Detailed', 'Determined', 'Disillusioned', 'Educated', 'Elated', 'Enchanting', 'Encouraging', 'Entertaining', 'Faded', 'Fascinated', 'Foregoing', 'Gleaming', 'Guarded', 'Halting', 'Hurried', 'Hurt', 'Imported', 'Jumbled', 'Knowing', 'Known', 'Labored', 'Lacking', 'Learned', 'Longing', 'Loving', 'Lying', 'Marked', 'Overrated', 'Pumped', 'Relieved', 'Roasted', 'Satisfying', 'Shocking', 'Standing', 'Telling', 'Tested', 'Uncovered', 'Understood', 'Upset', 'Used', 'Wanting', 'Whispering', 'Willing', 'Worried', 'Yielding']);
+const OTHER_WORD_TYPES = new Set(['Actually', 'Handsomely', 'Madly', 'Plant', 'Quack', 'Roblo']);
+
+const MIN_NAME_LENGTH = 3;
+const MAX_NAME_LENGTH = 20;
+const PAGE_SIZE = 1200;
+const INPUT_DEBOUNCE_MS = 200;
+const TOAST_DURATION_MS = 1400;
+const STORAGE_KEY = 'roblox-username-generator-settings';
+
+const CASINGS = {
+  original: text => text,
+  lower: text => text.toLowerCase(),
+  upper: text => text.toUpperCase(),
+};
+
+const EXAMPLE_MODIFIER = 'Happy';
+const FORMAT_EXAMPLES = {
+  prefix: base => EXAMPLE_MODIFIER + base,
+  suffix: base => base + EXAMPLE_MODIFIER,
+  underscore: base => `${EXAMPLE_MODIFIER}_${base}`,
+  lower: base => (EXAMPLE_MODIFIER + base).toLowerCase(),
+  upper: base => (EXAMPLE_MODIFIER + base).toUpperCase(),
+};
+
+const byName = (a, b) => a.name.localeCompare(b.name);
+const SORTERS = {
+  modifier: (a, b) => a.modifier.localeCompare(b.modifier) || byName(a, b),
+  shuffle: (a, b) => shuffleKey(a.name) - shuffleKey(b.name),
+  alphabetical: byName,
+  shortest: (a, b) => a.name.length - b.name.length || byName(a, b),
+  longest: (a, b) => b.name.length - a.name.length || byName(a, b),
+};
+
+const byId = id => document.getElementById(id);
+const form = byId('options');
+const baseInput = byId('base');
+const categoryList = byId('categories');
+const numbersInput = byId('numbers');
+const searchInput = byId('search');
+const sortSelect = byId('sort');
+const maxLengthInput = byId('maxLength');
+const maxLengthValue = byId('maxLengthValue');
+const showRejectedInput = byId('showRejected');
+const resultCount = byId('resultCount');
+const rejectedSummary = byId('rejectedSummary');
+const formatSection = byId('formatSection');
+const exportButton = byId('exportNames');
+
+const isNarrowScreen = matchMedia('(max-width: 600px)').matches;
+const canShare = Boolean(navigator.share) && matchMedia('(pointer: coarse)').matches;
+const resultList = byId('results');
+const moreRow = byId('more');
+const moreCount = byId('moreCount');
+const toastBox = byId('toast');
+
+let matches = [];
+let visibleLimit = PAGE_SIZE;
+
+function checkedValues(name) {
+  return [...form.querySelectorAll(`[name=${name}]:checked`)].map(input => input.value);
+}
+
+function wordType(word) {
+  if (VERB_FORMS.has(word)) return 'verb';
+  return OTHER_WORD_TYPES.has(word) ? 'other' : 'adjective';
+}
+
+function findProblems(name) {
+  const problems = [];
+  if (name.length < MIN_NAME_LENGTH) problems.push('too short');
+  if (name.length > MAX_NAME_LENGTH) problems.push('too long');
+  if (/[^A-Za-z0-9_]/.test(name)) problems.push('invalid characters');
+  if (/_.*_/.test(name)) problems.push('two underscores');
+  if (name.startsWith('_') || name.endsWith('_')) problems.push('underscore at edge');
+  return problems;
+}
+
+function generateNames() {
+  const base = baseInput.value.trim();
+  if (!base) return [];
+
+  const wordTypes = checkedValues('wordType');
+  const modifiers = checkedValues('category')
+    .flatMap(category => CATEGORIES[category])
+    .filter(word => wordTypes.includes(wordType(word)));
+  const separators = checkedValues('separator');
+  const placements = checkedValues('placement');
+  const numberSuffixes = ['', ...numbersInput.value.split(/\D+/).filter(Boolean)];
+  const applyCasing = CASINGS[form.elements.casing.value];
+
+  const entries = new Map();
+  for (const modifier of modifiers) {
+    for (const separator of separators) {
+      for (const placement of placements) {
+        const stem = placement === 'prefix'
+          ? modifier + separator + base
+          : base + separator + modifier;
+        for (const suffix of numberSuffixes) {
+          const name = applyCasing(stem + suffix);
+          if (!entries.has(name)) entries.set(name, { name, modifier, problems: findProblems(name) });
+        }
+      }
+    }
+  }
+  return [...entries.values()];
+}
+
+// A name keeps its random key between renders, so filtering or paging doesn't reshuffle the list.
+const shuffleKeys = new Map();
+function shuffleKey(name) {
+  if (!shuffleKeys.has(name)) shuffleKeys.set(name, Math.random());
+  return shuffleKeys.get(name);
+}
+
+const isRejected = entry => entry.problems.length > 0;
+
+// The length limit applies only to accepted names, so rejected ones stay available to show with their reason.
+function filterAndSort(entries) {
+  const query = searchInput.value.trim().toLowerCase();
+  const maxLength = Number(maxLengthInput.value);
+  return entries
+    .filter(entry =>
+      entry.name.toLowerCase().includes(query)
+      && (isRejected(entry) || entry.name.length <= maxLength))
+    .sort(SORTERS[sortSelect.value]);
+}
+
+function summarizeRejected(entries) {
+  if (!entries.length) return '';
+  const counts = {};
+  for (const { problems } of entries) {
+    for (const problem of problems) counts[problem] = (counts[problem] ?? 0) + 1;
+  }
+  const reasons = Object.entries(counts).map(([problem, count]) => `${problem} (${count})`).join(', ');
+  return `${entries.length} hidden because Roblox would reject them: ${reasons}.`;
+}
+
+function createResultItem({ name, problems }) {
+  const item = document.createElement('li');
+  item.dataset.name = name;
+  item.textContent = name;
+  if (problems.length) {
+    item.className = 'invalid';
+    const reasons = document.createElement('span');
+    reasons.className = 'problems';
+    reasons.textContent = ` (${problems.join(', ')})`;
+    item.append(reasons);
+  }
+  return item;
+}
+
+function renderResults() {
+  const visible = matches.slice(0, visibleLimit);
+  const hiddenCount = matches.length - visible.length;
+  resultList.replaceChildren(...visible.map(createResultItem));
+  resultCount.textContent = matches.length
+    ? `${visible.length} of ${matches.length} shown. Click or tap a name to copy it.`
+    : 'No names match the current options';
+  moreCount.textContent = `${hiddenCount} more not shown.`;
+  moreRow.hidden = hiddenCount === 0;
+}
+
+function renderFormatExamples() {
+  const base = baseInput.value.trim() || baseInput.defaultValue;
+  for (const example of document.querySelectorAll('[data-example]')) {
+    example.textContent = FORMAT_EXAMPLES[example.dataset.example](base);
+  }
+}
+
+function refresh() {
+  maxLengthValue.textContent = maxLengthInput.value;
+  renderFormatExamples();
+  const candidates = filterAndSort(generateNames());
+  const showRejected = showRejectedInput.checked;
+  matches = showRejected ? candidates : candidates.filter(entry => !isRejected(entry));
+  rejectedSummary.textContent = showRejected ? '' : summarizeRejected(candidates.filter(isRejected));
+  visibleLimit = PAGE_SIZE;
+  renderResults();
+}
+
+function validNames() {
+  return matches.filter(entry => !isRejected(entry)).map(entry => entry.name);
+}
+
+let toastTimer;
+function showToast(message) {
+  toastBox.textContent = message;
+  toastBox.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toastBox.hidden = true; }, TOAST_DURATION_MS);
+}
+
+async function copyText(text, successMessage) {
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast(successMessage);
+  } catch {
+    showToast('Copy failed');
+  }
+}
+
+function downloadText(text, filename) {
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function debounce(callback, delayMs) {
+  let timer;
+  return () => {
+    clearTimeout(timer);
+    timer = setTimeout(callback, delayMs);
+  };
+}
+
+categoryList.innerHTML = Object.entries(CATEGORIES).map(([category, words]) => `
+  <label class="check">
+    <input type="checkbox" name="category" id="category${category}" value="${category}" checked>
+    ${category} <span class="count">(${words.length})</span>
+  </label>`).join('');
+
+byId('categoryWords').innerHTML = Object.entries(CATEGORIES).map(([category, words]) => `
+  <dt>${category}</dt>
+  <dd>${words.join(', ')}</dd>`).join('');
+
+const savedElements = document.querySelectorAll('input:not([type=search]), select, details');
+
+function savedProperty(element) {
+  if (element.matches('details')) return 'open';
+  return element.matches('[type=checkbox], [type=radio]') ? 'checked' : 'value';
+}
+
+// localStorage throws when the browser blocks storage; the page still works without it.
+function saveSettings() {
+  const settings = {};
+  for (const element of savedElements) settings[element.id] = element[savedProperty(element)];
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+  } catch {}
+}
+
+function loadSettings() {
+  let settings;
+  try {
+    settings = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  } catch {}
+  if (!settings) return;
+  for (const element of savedElements) {
+    if (element.id in settings) element[savedProperty(element)] = settings[element.id];
+  }
+}
+
+function applyChanges() {
+  saveSettings();
+  refresh();
+}
+
+function setAllCategories(checked) {
+  for (const checkbox of categoryList.querySelectorAll('input')) checkbox.checked = checked;
+  applyChanges();
+}
+
+const applyChangesDebounced = debounce(applyChanges, INPUT_DEBOUNCE_MS);
+form.addEventListener('input', ({ target }) => {
+  if (target === sortSelect) shuffleKeys.clear();
+  if (target.matches('[type=text], [type=search]')) applyChangesDebounced();
+  else applyChanges();
+});
+form.addEventListener('submit', event => event.preventDefault());
+for (const section of document.querySelectorAll('details')) section.addEventListener('toggle', saveSettings);
+
+byId('selectAllCategories').addEventListener('click', () => setAllCategories(true));
+byId('clearAllCategories').addEventListener('click', () => setAllCategories(false));
+byId('resetOptions').addEventListener('click', () => {
+  form.reset();
+  applyChanges();
+});
+
+byId('classicFormat').addEventListener('click', () => {
+  for (const input of formatSection.querySelectorAll('input')) {
+    input.checked = input.defaultChecked;
+    input.value = input.defaultValue;
+  }
+  applyChanges();
+});
+
+byId('showMore').addEventListener('click', () => {
+  visibleLimit += PAGE_SIZE;
+  renderResults();
+});
+
+resultList.addEventListener('click', ({ target }) => {
+  const item = target.closest('li');
+  if (item) copyText(item.dataset.name, `Copied: ${item.dataset.name}`);
+});
+
+byId('copyAll').addEventListener('click', () => {
+  const names = validNames();
+  if (!names.length) return showToast('No valid names to copy');
+  copyText(names.join('\n'), `Copied ${names.length} valid names`);
+});
+
+exportButton.textContent = canShare ? 'Share' : 'Export .txt';
+exportButton.addEventListener('click', async () => {
+  const names = validNames();
+  if (!names.length) return showToast('No valid names to export');
+  const text = names.join('\n');
+  if (!canShare) {
+    downloadText(text, `${baseInput.value.trim()}_usernames.txt`);
+    return showToast(`Exported ${names.length} valid names`);
+  }
+  try {
+    await navigator.share({ text });
+  } catch (error) {
+    if (error.name !== 'AbortError') showToast('Share failed');
+  }
+});
+
+if (isNarrowScreen) formatSection.open = false;
+loadSettings();
+refresh();
+</script>
+</body>
+</html>
