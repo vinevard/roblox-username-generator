@@ -8,7 +8,9 @@ From 2009 to 2017, Roblox suggested names like these whenever the username you w
 
 ## Try it
 
-Download `index.html` and open it in a browser. It is one file with no build step, and it makes no network requests.
+Open it at **[vinevard.github.io/roblox-username-generator](https://vinevard.github.io/roblox-username-generator/)**.
+
+Or download `index.html` and open it in a browser. It is one file with no build step, and it makes no network requests.
 
 ## What it does
 
