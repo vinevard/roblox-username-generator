@@ -146,7 +146,10 @@
     height: 4px;
     background: #bbb;
     border: 1px solid #888;
-    outline: none;
+  }
+  input[type=range]:focus-visible {
+    outline: 2px solid #000;
+    outline-offset: 6px;
   }
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -188,10 +191,19 @@
     padding: 0;
     list-style: none;
   }
-  #results li {
-    cursor: pointer;
+  #results button {
+    display: block;
+    width: 100%;
     padding: 2px 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    text-align: left;
     overflow-wrap: anywhere;
+  }
+  #results button:focus-visible {
+    outline: 2px solid #000;
+    outline-offset: 1px;
   }
   @media (min-width: 700px) {
     #results {
@@ -199,7 +211,7 @@
     }
   }
   #results .invalid {
-    color: #999;
+    color: #666;
   }
   #results .problems {
     color: #b00;
@@ -238,7 +250,8 @@
       width: 24px;
       height: 28px;
     }
-    #results li {
+    #results button {
+      min-height: 0;
       padding: 6px 0;
     }
   }
@@ -504,16 +517,19 @@ function summarizeRejected(entries) {
 }
 
 function createResultItem({ name, problems }) {
-  const item = document.createElement('li');
-  item.dataset.name = name;
-  item.textContent = name;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.dataset.name = name;
+  button.textContent = name;
   if (problems.length) {
-    item.className = 'invalid';
+    button.className = 'invalid';
     const reasons = document.createElement('span');
     reasons.className = 'problems';
     reasons.textContent = ` (${problems.join(', ')})`;
-    item.append(reasons);
+    button.append(reasons);
   }
+  const item = document.createElement('li');
+  item.append(button);
   return item;
 }
 
@@ -660,8 +676,8 @@ byId('showMore').addEventListener('click', () => {
 });
 
 resultList.addEventListener('click', ({ target }) => {
-  const item = target.closest('li');
-  if (item) copyText(item.dataset.name, `Copied: ${item.dataset.name}`);
+  const button = target.closest('button');
+  if (button) copyText(button.dataset.name, `Copied: ${button.dataset.name}`);
 });
 
 byId('copyAll').addEventListener('click', () => {
